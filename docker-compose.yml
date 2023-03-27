@@ -1,0 +1,39 @@
+version: '3.1'
+services:
+  odoo:
+    image: odoo:16.0
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=myodoo
+    depends_on:
+      - db
+    expose:
+      - 8069
+#    tty: true
+#    command: -- --dev=reload
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    restart: always
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=myodoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db_data:/var/lib/postgresql/data/pgdata
+    restart: always
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - odoo
+
+volumes:
+  odoo_data:
+  db_data:
